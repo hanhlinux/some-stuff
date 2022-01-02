@@ -41,6 +41,17 @@ void die (char x[], int y) {
 	err(x);
 	exit(y);
 	}
+
+/*Function for unpacking packages*/
+int untar(char a[], char b[]) {
+	char command[2048] = "";
+	strcat(command, "tar -C ");
+	strcat(command, a);
+	strcat(command, " -xf ");
+	strcat(command, b);
+	int c = system(command);
+	return c;
+	}
 	
 /*Function for checking path*/
 int check_path(char a[], char b[], int c) {
@@ -67,11 +78,18 @@ int INSTALL(char a[]) {
 	printf("%s", a);
 	char *token = strtok(a, " ");
 	while ( token != NULL) {
+		char template[2048] = "/tmp/pachanh/tmp.XXXXXX";
+		char header[2048] = "";
+		strcpy(token, header);
+		strcat(header, " pre-install");
+		mkdtemp(template);
+		untar(template, header);
 		
+		untar(template, token);
 		token = strtok(NULL, " ");
 		}
 		return 0;
-	}
+	}  
 	
 	
 int main(int argc, char **argv)
