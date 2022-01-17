@@ -79,7 +79,8 @@ int check_path(char a[], char b[], int c, int d) {
 	/* a: Object name (not variable)
 	 * b: Object to check
 	 * c: Non-zero exit code
-	 * d: Check mode (0 for file, 1 for directory)*/
+	 * d: Check mode (0 for file, 1 for directory)
+	 * e: Quiet or not (1: quiet, 2: verbose)*/
 	char bruh[__PATHCHARS], errMsg[__PATHCHARS];
 	int if_found, code;
 	struct stat buf;
@@ -118,6 +119,34 @@ int check_path(char a[], char b[], int c, int d) {
 	// Mode: invalid
 	else {
 		err("Requested mode is invalid\n");
+		return c;
+		}
+	}
+
+int silent_check_path(char b[], int c, int d) {
+	/* b: Object to check
+	 * c: Non-zero exit code
+	 * d: Check mode (0 for file, 1 for directory)*/
+	int if_found, code;
+	struct stat buf;
+	
+	// Check if the file exists	
+	if_found=stat(b, &buf);
+	if (if_found != 0) {
+		return if_found;
+		}
+	// Return the value depends on used mode	
+	// Mode: File
+	if (d == 0) {
+		return 0;
+	} 
+	// Mode: directory
+	else if (d == 1) {
+		int code = S_ISREG(buf.st_mode);
+		return code;
+		}
+	// Mode: invalid
+	else {
 		return c;
 		}
 	}
@@ -355,7 +384,54 @@ int FIND (char a[], char b[], char c[]) {
 		}
 		return 0;
 	}
-	
+
+int REMOVE(char a[], char b[]) {
+	/* a: Packages
+	 * b: Root directory */
+	 char *token, *filetok, *bufA = NULL, bufB = NULL; 
+	 char pkg[__PATHCHARS] = "", datadir[__PATHCHARS] = "", pkgfl[__PATHCHARS] = "", d[5]="";
+	 int code = 0, c; 
+	 FILE *file;
+	 
+	 snprintf(datadir, __PATHCHARS, "%s/var/lib/pachanh/system/", b);
+	 strcpy(pkg, a);
+	 token = strtok_r(pkg, " ", &bufA); 
+	 while (token != NULL) {
+		 snprintf(pkgfl, __PATHCHARS, "%s/%s/filelist", datadir, token);
+		 printf("Check if package %s is installed", )
+		 code = check_path(pkgdir, pkgdir, 1, 1); 
+		 check_code(code); 
+		 int size = getSize(pkgfl) + 1; 
+		 char flc[size]; 
+		 file = fopen(pkgfl, "r"); 
+		 while (1) {
+			 int i =0;
+			 c = getc(file); 
+			 if (feof(file)) {
+				 break;
+				 }
+			 snprintf(d, 5, "%c", c); 
+			 if (i == 0) {
+				 strcpy(flc, c);
+				 }
+			 else {
+				 strcat(flc, c);
+				 }
+			 }
+		 filetok = strtok_r(flc, "\n", &bufB); 
+		 while (filetok != NULL) {
+			 char filepath[__PATHCHARS] = "";
+			 snprintf(filepath, __PATHCHARS, "%s/%s", b, filetok);
+			 int if_dir = silent_check_path(filepath); 
+			 if (if_dir != 0) {
+				 remove(filepath);
+				 }
+			 filetok = strtok_r(NULL, "\n", &bufB);
+			 }
+		 token = strtok_r(NULL, "\n", &bufA); 
+		 }
+		 
+	}
 void general_die() {
 	die("Feature is not ready to be used", 1);
 	}
